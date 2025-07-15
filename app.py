@@ -1,35 +1,63 @@
-import kagglehub
 import pandas as pd
+import kagglehub
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import (
+    accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+)
 
-# 1. Baixar o dataset
+# 1. Baixar e carregar os dados
 path = kagglehub.dataset_download("cherngs/heart-disease-cleveland-uci")
-
-print("Path to dataset files:", path)
-
-# 2. Carregar o CSV (ajustar o nome se necessário)
-csv_path = f"{path}/heart_cleveland_upload.csv" 
+csv_path = f"{path}/heart_cleveland_upload.csv"
 df = pd.read_csv(csv_path)
 
-print(df.head())  
-print(df.info())     
-print(df.describe())
+# 2. Verificar dados
+print(df.info())
+print(df.isnull().sum())
 
-#1 passo: Separar entradas e saidas de dados com base no nosso csv.
-X = df.drop("condition", axis=1)
-y = df["condition"]
+# 3. Definir X (features) e y (target)
+X = df.drop('condition', axis=1)
+y = df['condition']
 
-#2 passo: criar dados de treino e teste (test_size significa a porcentagem que sera dos dados de teste e o restante de treino. )
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# 4. Dividir em treino/teste
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-modelo = LogisticRegression(max_iter=1000)
-modelo.fit(X_train, y_train)
+# 5. Padronizar os dados
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
-y_pred = modelo.predict(X_test)
+# 6. Treinar modelo de Regressão Logística
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_scaled, y_train)
 
-print("Acurácia:", accuracy_score(y_test, y_pred))
+# 7. Fazer predições
+y_pred = model.predict(X_test_scaled)
 
-print(df['condition'].value_counts())
+# 8. Avaliação
+print("\n🔍 Acurácia:", accuracy_score(y_test, y_pred))
+print("\n📊 Relatório de Classificação:\n", classification_report(y_test, y_pred))
 
+# 9. Matriz de confusão
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(cmap="Blues")
+plt.title("Matriz de Confusão")
+plt.show()
+
+# 10. Coeficientes do modelo
+coef_df = pd.DataFrame({
+    'Variável': X.columns,
+    'Coeficiente': model.coef_[0]
+}).sort_values(by='Coeficiente', key=np.abs, ascending=False)
+
+print("\nCoeficientes (importância das variáveis):")
+print(coef_df)
