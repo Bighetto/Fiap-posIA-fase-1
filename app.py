@@ -16,6 +16,16 @@ path = kagglehub.dataset_download("cherngs/heart-disease-cleveland-uci")
 csv_path = f"{path}/heart_cleveland_upload.csv"
 df = pd.read_csv(csv_path)
 
+# Contar quantos têm age < 40
+count_menor_que_40 = df[df['age'] < 40].shape[0]
+print(f"Quantidade de pessoas com idade menor que 40: {count_menor_que_40}")
+
+# Contar quantos têm age > 70
+count_maior_que_70 = df[df['age'] > 70].shape[0]
+print(f"Quantidade de pessoas com idade maior que 70: {count_maior_que_70}")
+# Removendo dados fracos
+df = df[(df['age'] >= 40) & (df['age'] <= 70)]
+
 # 2. Verificar dados
 print(df.info())
 print(df.isnull().sum())
