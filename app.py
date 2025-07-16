@@ -4,7 +4,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import (train_test_split,cross_val_score)
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -31,7 +31,8 @@ print(df.info())
 print(df.isnull().sum())
 
 # 3. Definir X (features) e y (target)
-X = df.drop('condition', axis=1)
+# X = df.drop('condition', axis=1)
+X = df[['thal', 'ca', 'oldpeak', 'exang', 'cp']]
 y = df['condition']
 
 # 4. Dividir em treino/teste
@@ -50,6 +51,10 @@ model.fit(X_train_scaled, y_train)
 
 # 7. Fazer predições
 y_pred = model.predict(X_test_scaled)
+
+#7.1 Validacoes cruzadas
+scores = cross_val_score(model, X, y, cv=5, scoring='f1')
+print("\nF1 médio (cross-validation):", scores.mean())
 
 # 8. Avaliação
 print("\n🔍 Acurácia:", accuracy_score(y_test, y_pred))
