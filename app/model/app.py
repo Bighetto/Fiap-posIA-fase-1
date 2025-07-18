@@ -3,6 +3,7 @@ import kagglehub
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import joblib
 
 from sklearn.model_selection import (train_test_split,cross_val_score)
 from sklearn.preprocessing import StandardScaler
@@ -76,3 +77,6 @@ coef_df = pd.DataFrame({
 
 print("\nCoeficientes (importância das variáveis):")
 print(coef_df)
+
+joblib.dump(model, "app/model/modelo.pkl")
+joblib.dump(scaler, "app/model/scaler.pkl")
